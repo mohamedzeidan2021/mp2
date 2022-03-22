@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, FlatList } from "react-native";
 import { Appbar, Card } from "react-native-paper";
-import firebase from "firebase/app";
-import "firebase/firestore";
+import { getFirestore, collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import { SocialModel } from "../../../../models/social.js";
 import { styles } from "./FeedScreen.styles";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -28,13 +27,11 @@ export default function FeedScreen({ navigation }: Props) {
   const [socials, setSocials] = useState<SocialModel[]>([]);
 
   useEffect(() => {
-    const db = firebase.firestore();
-    const unsubscribe = db
-      .collection("socials")
-      .orderBy("eventDate", "asc")
-      .onSnapshot((querySnapshot) => {
-        var newSocials: SocialModel[] = [];
-        querySnapshot.forEach((social) => {
+    const db = getFirestore();
+    const socialsCollection = collection(db, "socials");
+    const unsubscribe = onSnapshot(query(socialsCollection, orderBy("eventDate", "asc")), (querySnapshot) => {
+      var newSocials: SocialModel[] = [];
+        querySnapshot.forEach((social: any) => {
           const newSocial = social.data() as SocialModel;
           newSocial.id = social.id;
           newSocials.push(newSocial);

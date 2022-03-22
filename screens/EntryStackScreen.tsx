@@ -5,5 +5,5 @@ export function EntryStackScreen() {
   // keeps track of the Authentication State. If a user is signed in,
   // this screen will return the RootStack. Otherwise, this screen will
   // return the MainStack. For now, we just return the RootStack.
-  return RootStackScreen();
+  return <RootStackScreen />;
 }
