@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { Appbar, TextInput, Snackbar, Button } from "react-native-paper";
 import { getFileObjectAsync } from "../../../Utils";
+import { v4 as uuidv4 } from 'uuid';
+import ConfirmationScreen from "../MainStack/ConfirmationScreen";
 
 // See https://github.com/mmazzarolo/react-native-modal-datetime-picker
 // Most of the date picker code is directly sourced from the example
@@ -12,9 +14,9 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import * as ImagePicker from "expo-image-picker";
 import { styles } from "./NewSocialScreen.styles";
 
-import { getFirestore, doc, collection, setDoc } from "firebase/firestore";
+import { getFirestore, doc, collection, setDoc, addDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { getApp } from "firebase/app";
+import { getApp, initializeApp } from "firebase/app";
 import { SocialModel } from "../../../models/social";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../RootStackScreen";
@@ -62,8 +64,8 @@ export default function NewSocialScreen({ navigation }: Props) {
       quality: 1,
     });
     console.log("done");
-    if (!result.cancelled) {
-      setEventImage(result.uri);
+    if (!result.canceled) {
+      setEventImage(result.assets[0].uri);
     }
   };
 
@@ -113,34 +115,48 @@ export default function NewSocialScreen({ navigation }: Props) {
     }
 
     try {
-      // Firestore wants a File Object, so we first convert the file path
-      // saved in eventImage to a file object.
-      console.log("getting file object");
-      const object: Blob = (await getFileObjectAsync(eventImage)) as Blob;
-      // Generate a brand new doc ID by calling .doc() on the socials node.
+      const firebaseConfig = {
+        "apiKey": "AIzaSyD2NiLYlVvexyFQGPGl6pEm4RIN0yMwEXQ",
+        "authDomain": "socialstest-e5816.firebaseapp.com",
+        "projectId": "socialstest-e5816",
+        "storageBucket": "socialstest-e5816.appspot.com",
+        "messagingSenderId": "931489795257",
+        "appId": "1:931489795257:web:72ff9e22227ecb1e5e1f68",
+        "measurementId": "G-F8WWBJ1E6C"
+      }
+      const app = initializeApp(firebaseConfig);
       const db = getFirestore();
       const socialsCollection = collection(db, "socials");
       const socialRef = doc(socialsCollection);
       console.log("putting file object");
-      const storage = getStorage(getApp());
-      const storageRef = ref(storage, socialRef.id + ".jpg");
-      const result = await uploadBytes(storageRef, object);
-      console.log("getting download url");
-      const downloadURL = await getDownloadURL(result.ref);
+      const storage = getStorage(app);
+
+      const response = await fetch(eventImage);
+      const blob = await response.blob();
+
+      const storageRef = ref(storage, `images/${socialRef.id}.jpg`);
+      await uploadBytes(storageRef, blob);
+
+      const downloadURL = await getDownloadURL(storageRef);
+
       const socialDoc: SocialModel = {
         eventName: eventName,
         eventDate: eventDate.getTime(),
         eventLocation: eventLocation,
         eventDescription: eventDescription,
-        eventImage: downloadURL,
+        eventImage: "",
+        // eventImage: downloadURL,
       };
       console.log("setting download url");
-      await setDoc(socialRef, socialDoc);
+      const docRef = await addDoc(socialsCollection, socialDoc);
+      console.log("Document written with ID: ", docRef.id);
+
       setLoading(false);
-      navigation.goBack();
+      navigation.navigate('ConfirmationScreen');
     } catch (error: any) {
       setLoading(false);
       showError(error.toString());
+      console.log("ERROR", error.toString());
     }
   };
 
@@ -162,14 +178,12 @@ export default function NewSocialScreen({ navigation }: Props) {
           value={eventName}
           onChangeText={(name) => setEventName(name)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
-          autoComplete={false}
         />
         <TextInput
           label="Event Location"
           value={eventLocation}
           onChangeText={(location) => setEventLocation(location)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
-          autoComplete={false}
         />
         <TextInput
           label="Event Description"
@@ -177,7 +191,6 @@ export default function NewSocialScreen({ navigation }: Props) {
           multiline={true}
           onChangeText={(desc) => setEventDescription(desc)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
-          autoComplete={false}
         />
         <Button
           mode="outlined"
