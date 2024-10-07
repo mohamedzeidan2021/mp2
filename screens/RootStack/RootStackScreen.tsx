@@ -28,11 +28,8 @@ export function RootStackScreen() {
           options={options}
           component={NewSocialScreen}
         />
-        <RootStack.Screen
-          name="ConfirmationScreen"
-          options={options}
-          component={ConfirmationScreen}
-        />
+        {/* Create a confirmation screen that appears after you create a social (refer to video demo) */}
+        {/* Be as creative as you'd like, but ensure that it has two buttons, one to go to home screen, and one to view socials */}
       </RootStack.Navigator>
     </NavigationContainer>
   );

@@ -4,8 +4,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import FeedScreen from "./FeedScreen/FeedScreen.main";
 import DetailScreen from "./DetailScreen/DetailScreen.main";
 import NewSocialScreen from "../NewSocialScreen/NewSocialScreen.main";
-import HomeScreen from "./HomeScreen/HomeScreen";
-import ConfirmationScreen from "./ConfirmationScreen/ConfirmationScreen";
 import { SocialModel } from "../../../models/social";
 
 export type MainStackParamList = {
@@ -20,12 +18,14 @@ const MainStack = createStackNavigator<MainStackParamList>();
 
 export function MainStackScreen() {
   return (
-    <MainStack.Navigator initialRouteName="HomeScreen">
-      <MainStack.Screen
-        name="HomeScreen"
-        options={{ headerShown: false }}
-        component={HomeScreen}
-      />
+    // TODO: Ensure that the initial route that the navigator goes to is the HomeScreen (which is a screen you have to implement!)
+    // See docs on stack navigator, what can we add as a prop into MainStack.Navigator to make sure that the HomeScreen is the initial route?
+    // https://reactnavigation.org/docs/2.x/stack-navigator/
+
+    <MainStack.Navigator>
+
+      {/* Add your HomeScreen to the MainStack here! */}
+
       <MainStack.Screen
         name="FeedScreen"
         component={FeedScreen}
@@ -34,7 +34,7 @@ export function MainStackScreen() {
           headerLeft: () => (
             <Button
               title="Home"
-              onPress={() => navigation.goBack()}
+              onPress={/*TODO*/} // When we click the home button on top left, navigate to HomeScreen
             />
           ),
           headerTitle: "All Socials",
@@ -50,11 +50,6 @@ export function MainStackScreen() {
         name="NewSocialScreen"
         options={{ headerShown: false }}
         component={NewSocialScreen}
-      />
-      <MainStack.Screen
-        name="ConfirmationScreen"
-        options={{ headerShown: false }}
-        component={ConfirmationScreen}
       />
     </MainStack.Navigator>
   );
