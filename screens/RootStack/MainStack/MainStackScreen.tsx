@@ -4,8 +4,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import FeedScreen from "./FeedScreen/FeedScreen.main";
 import DetailScreen from "./DetailScreen/DetailScreen.main";
 import NewSocialScreen from "../NewSocialScreen/NewSocialScreen.main";
-import HomeScreen from "./HomeScreen";
-import ConfirmationScreen from "./ConfirmationScreen";
+import HomeScreen from "./HomeScreen/HomeScreen";
+import ConfirmationScreen from "./ConfirmationScreen/ConfirmationScreen";
 import { SocialModel } from "../../../models/social";
 
 export type MainStackParamList = {

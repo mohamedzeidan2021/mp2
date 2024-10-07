@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { Appbar, TextInput, Snackbar, Button } from "react-native-paper";
-import { getFileObjectAsync } from "../../../Utils";
-import { v4 as uuidv4 } from 'uuid';
-import ConfirmationScreen from "../MainStack/ConfirmationScreen";
+import config from "../../../keys.json";
 
 // See https://github.com/mmazzarolo/react-native-modal-datetime-picker
 // Most of the date picker code is directly sourced from the example
@@ -115,48 +113,49 @@ export default function NewSocialScreen({ navigation }: Props) {
     }
 
     try {
-      const firebaseConfig = {
-        "apiKey": "AIzaSyD2NiLYlVvexyFQGPGl6pEm4RIN0yMwEXQ",
-        "authDomain": "socialstest-e5816.firebaseapp.com",
-        "projectId": "socialstest-e5816",
-        "storageBucket": "socialstest-e5816.appspot.com",
-        "messagingSenderId": "931489795257",
-        "appId": "1:931489795257:web:72ff9e22227ecb1e5e1f68",
-        "measurementId": "G-F8WWBJ1E6C"
-      }
+      const firebaseConfig = config;
       const app = initializeApp(firebaseConfig);
       const db = getFirestore();
       const socialsCollection = collection(db, "socials");
       const socialRef = doc(socialsCollection);
-      console.log("putting file object");
       const storage = getStorage(app);
 
       const response = await fetch(eventImage);
       const blob = await response.blob();
 
       const storageRef = ref(storage, `images/${socialRef.id}.jpg`);
-      await uploadBytes(storageRef, blob);
 
-      const downloadURL = await getDownloadURL(storageRef);
+      await uploadBytes(storageRef, blob)
+        .then(snapshot => {
+          console.log("Uploaded a blob or file!", snapshot);
 
-      const socialDoc: SocialModel = {
-        eventName: eventName,
-        eventDate: eventDate.getTime(),
-        eventLocation: eventLocation,
-        eventDescription: eventDescription,
-        eventImage: "",
-        // eventImage: downloadURL,
-      };
-      console.log("setting download url");
-      const docRef = await addDoc(socialsCollection, socialDoc);
-      console.log("Document written with ID: ", docRef.id);
+          // Get the download URL after the image is uploaded
+          return getDownloadURL(snapshot.ref); // <- Use getDownloadURL function from firebase/storage
+        })
+        .then(url => {
+          // Create the socialDoc object with the download URL
+          const socialDoc: SocialModel = {
+            eventName: eventName,
+            eventDate: eventDate.getTime(),
+            eventLocation: eventLocation,
+            eventDescription: eventDescription,
+            eventImage: url,  // Use the URL here
+          };
 
-      setLoading(false);
-      navigation.navigate('ConfirmationScreen');
+          // Add the socialDoc to Firestore
+          return addDoc(socialsCollection, socialDoc);
+        })
+        .then(docRef => {
+          setLoading(false);
+          navigation.navigate('ConfirmationScreen');
+        })
+        .catch(error => {
+          setLoading(false);
+          showError(error.toString());
+        });
     } catch (error: any) {
       setLoading(false);
       showError(error.toString());
-      console.log("ERROR", error.toString());
     }
   };
 

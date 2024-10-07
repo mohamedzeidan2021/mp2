@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { MainStackScreen } from "./MainStack/MainStackScreen";
 import NewSocialScreen from "./NewSocialScreen/NewSocialScreen.main";
 import { NavigationContainer } from "@react-navigation/native";
-import ConfirmationScreen from "./MainStack/ConfirmationScreen";
+import ConfirmationScreen from "./MainStack/ConfirmationScreen/ConfirmationScreen";
 
 export type RootStackParamList = {
   Main: undefined;

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { MainStackParamList } from "./MainStackScreen";
+import { MainStackParamList } from "../MainStackScreen";
 import { styles } from "./ConfirmationScreen.styles";
 
 interface Props {
